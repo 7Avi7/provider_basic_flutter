@@ -11,6 +11,8 @@ class PetsProvider extends ChangeNotifier {
   bool isLoading = true;
   String error = '';
   Pets pets = Pets(data: []);
+  Pets searchedPets = Pets(data: []);
+  String searchText = '';
 
   getDataFromAPI() async {
     try {
@@ -24,6 +26,25 @@ class PetsProvider extends ChangeNotifier {
       error = e.toString();
     }
     isLoading = false;
+    updateData();
+    // notifyListeners();
+  }
+
+  updateData() {
+    searchedPets.data.clear();
+    if (searchText.isEmpty) {
+      searchedPets.data.addAll(pets.data);
+    } else {
+      searchedPets.data.addAll(pets.data
+          .where((element) =>
+              element.userName.toLowerCase().startsWith(searchText))
+          .toList());
+    }
     notifyListeners();
+  }
+
+  search(String userName) {
+    searchText = userName;
+    updateData();
   }
 }

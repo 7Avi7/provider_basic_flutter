@@ -1,5 +1,6 @@
-import 'package:api_provider/model.dart';
-import 'package:api_provider/provider.dart';
+// import 'package:api_provider/model.dart';
+// import 'package:api_provider/provider.dart';
+import 'package:api_provider_searched_pet/provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:provider/provider.dart';
@@ -31,7 +32,7 @@ class _MyHomePageState extends State<MyHomePage> {
             ? getLoadingUI()
             : provider.error.isNotEmpty
                 ? getErrorUI(provider.error)
-                : getBodyUI(provider.pets));
+                : getBodyUI());
   }
 
   Widget getLoadingUI() {
@@ -61,22 +62,48 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
-  getBodyUI(Pets pets) {
-    return ListView.builder(
-      itemCount: pets.data.length,
-      itemBuilder: (context, index) => ListTile(
-        leading: CircleAvatar(
-          radius: 22,
-          backgroundImage: NetworkImage(pets.data[index].petImage),
-        ),
-        title: Text(pets.data[index].userName),
-        trailing: pets.data[index].isFriendly
-            ? const SizedBox()
-            : const Icon(
-                Icons.pets,
-                color: Colors.red,
+  getBodyUI() {
+    final provider = Provider.of<PetsProvider>(context, listen: false);
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: TextField(
+            onChanged: (value) {
+              provider.search(value);
+            },
+            decoration: InputDecoration(
+              hintText: 'Search Pets...',
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
               ),
-      ),
+              suffixIcon: const Icon(Icons.search),
+            ),
+          ),
+        ),
+        Expanded(
+          child: Consumer(
+            builder: (context, PetsProvider petsProvider, child) =>
+                ListView.builder(
+              itemCount: petsProvider.searchedPets.data.length,
+              itemBuilder: (context, index) => ListTile(
+                leading: CircleAvatar(
+                  radius: 22,
+                  backgroundImage: NetworkImage(
+                      petsProvider.searchedPets.data[index].petImage),
+                ),
+                title: Text(provider.searchedPets.data[index].userName),
+                trailing: provider.searchedPets.data[index].isFriendly
+                    ? const SizedBox()
+                    : const Icon(
+                        Icons.pets,
+                        color: Colors.red,
+                      ),
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
